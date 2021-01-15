@@ -209,6 +209,39 @@ def add_transaction(book, description, amount, debit_acct, credit_acct):
         return False
 
 
+def create_recursive_acct_tree(tree, deq):
+    '''Given a deque of accounts such as 'Accounts:Checking:Food' and a
+       Treelib.Tree object, recursively iterate over each element of the deque
+       adding it as a child of the previous leaf object of the tree.
+
+       Note: I still need to figure out how to graft trees like this together!
+
+       example:
+       tree = Tree()
+       tree.create_node('Accounts', 'accounts')
+       deq = deque('Assets:Checking:Food'.split(':'))
+       t = create_recursive_acct_tree(tree, deq)
+       t.show()
+
+       Accounts
+       └── Assets
+           └── Personal Checking
+               └── Budget
+                   └── Credit Cards and Loans
+       '''
+    parent = tree.leaves()[0].identifier
+    logger.debug(f'The parent is: {parent}')
+    logger.debug(f'Creating node with deq == {deq}')
+    tree.create_node(deq[0], deq[0].lower(), parent=parent)
+    if len(deq) == 1:
+        return tree
+    else:
+        logger.debug('Running popleft()')
+        deq.popleft()
+        logger.debug(f'Running recursion with deq == {deq}')
+        return create_recursive_acct_tree(tree, deq)
+
+
 def get_gnucash_dir():
     '''Get the fully qualified path of the directory of your .gnucash file'''
     try:
